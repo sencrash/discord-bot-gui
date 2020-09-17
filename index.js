@@ -11,7 +11,7 @@ let actualChannel = null;
 /**
  * Loads messages from a map to the ui
  */
-function messagestowindow(value, key, map) {
+function messagestowindow(value) {
     var url = 0;
     value.attachments.forEach(attachment => {
         url = attachment.url;
@@ -125,23 +125,24 @@ ipcMain.on('tokenSent', (event, token) => {
 });
 
 ipcMain.on('loaded', (event) => {
-    guilds = discordClient.guilds.array();
+    guilds = discordClient.guilds.cache.array()
     event.sender.send('init', guilds);
 });
 
 ipcMain.on('changesrv', (event, id) => {
     actualChannel = null;
-    let server = discordClient.guilds.get(id);
-    guildChannels = server.channels.array();
-    event.sender.send('srvinfo', guildChannels, server);
+    discordClient.guilds.fetch(id)
+        .then(guild => guildChannels = guild.channels.cache.array())
+        .then(guild => event.sender.send('srvinfo', guildChannels, guild));
 });
 
 ipcMain.on('changechannel', (event, id) => {
-    actualChannel = discordClient.channels.get(id);
-    actualChannel.fetchMessages({ limit: 100 })
-        .then(messages => messages.first(100).reverse().forEach(messagestowindow))
+    discordClient.channels.fetch(id).then( actualChannel => {
+    actualChannel.messages.fetch({ limit: 100 })
+        .then(messages => messages.first(100).reverse().forEach(console.log))
         .catch(console.error);
     event.sender.send('channelok');
+})
 });
 
 ipcMain.on('post', (event, message) => {
