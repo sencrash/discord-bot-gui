@@ -27,6 +27,6 @@
     "electron": "^3.0.6",
     "htmlspecialchars": "^1.0.5",
     "jquery": "^3.5.1",
-    "markdown-it": "^11.0.0"
+    "markdown-it": "^12.0.0"
   }
 }
